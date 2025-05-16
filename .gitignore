@@ -1,0 +1,21 @@
+# macOS system files
+.DS_Store
+
+# IDE folders
+.idea/
+.vscode/
+
+# Build artifacts
+*.o
+*.out
+*.exe
+/build/
+/cmake-build-*/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# C++ backup files
+*~
+*.swp
