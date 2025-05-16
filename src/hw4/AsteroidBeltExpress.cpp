@@ -15,14 +15,6 @@ const int INF = 1e9;
   ios::sync_with_stdio(0);                                                     \
   cin.tie(0);
 
-struct q_c {
-  int u;
-  int v;
-  int q;
-
-  q_c(int u, int v, int q) : u(u), v(v), q(q) {}
-};
-
 void dijkstra (const vector<vpii> &adj, vi &dist, ll start) {
   int n = adj.size();
 
@@ -50,7 +42,7 @@ void dijkstra (const vector<vpii> &adj, vi &dist, ll start) {
   }
 }
 
-int main(){
+int main() {
   fastio();
   int T;
   cin >> T;
@@ -59,48 +51,27 @@ int main(){
     int n, m, k, s, t;
     cin >> n >> m >> k >> s >> t;
 
-    vector<vpii> adj (n+1);
-    vi dist (n+1);
-    vector<q_c> q_adj;
+    vector<vpii> adj (2*n+1);
+    vi dist (2*n+1);
 
     int a, b, w;
     for (int i = 0; i < m; i ++) {
       cin >> a >> b >> w;
       adj[a].emplace_back(b,w);
+      adj[a+n].emplace_back(b+n,w);
     }
 
     for (int i = 0; i < k; i ++) {
       cin >> a >> b >> w;
-      q_c trip = q_c(a, b, w);
-      q_adj.push_back(trip);
+      adj[a].emplace_back(b+n,w);
+      adj[b].emplace_back(a+n,w);
     }
 
-    int min_cost = INT_MAX;
-    for (int i = 0; i < k; i ++) {
-      auto trp = q_adj[i];
-
-      auto temp_adj = adj;
-
-      auto &adj_u = temp_adj[trp.u];
-      adj_u.erase(remove_if(adj_u.begin(), adj_u.end(),
-        [&](const pii& p) {return p.first == trp.v;}), adj_u.end());
-
-      auto &adj_v = temp_adj[trp.v];
-      adj_v.erase(remove_if(adj_v.begin(), adj_v.end(),
-        [&](const pii& p) {return p.first == trp.u;}), adj_v.end());
-
-      temp_adj[trp.u].push_back({trp.v, trp.q});
-      temp_adj[trp.v].push_back({trp.u, trp.q});
-      dijkstra(temp_adj, dist, s);
-      if (dist[t] < min_cost) {
-        min_cost = dist[t];
-      }
-    }
-
-    if (min_cost == INT_MAX) {
+    dijkstra(adj, dist, s);
+    if (dist[t + n] == INT_MAX && dist[t] == INT_MAX) {
       cout << "-1" << "\n";
     } else {
-      cout << min_cost << "\n";
+      cout << min(dist[t + n], dist[t]) << "\n";
     }
   }
 
