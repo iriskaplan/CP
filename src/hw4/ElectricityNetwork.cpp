@@ -14,88 +14,123 @@ ios::sync_with_stdio(0);                                                     \
 cin.tie(0);
 
 void reachable_from(ll node, vvl &graph, vector<bool> &reachable) {
-  stack<ll> stack;
-  stack.push(node);
-  reachable[node] = true;
-  while (!stack.empty()) {
-    ll u = stack.top(); stack.pop();
-    reachable[u] = true;
+	stack<ll> stack;
+	stack.push(node);
+	reachable[node] = true;
+	while (!stack.empty()) {
+		ll u = stack.top();
+		stack.pop();
 
-    for (auto v : graph[u]) {
-      if (!reachable[v]) {
-        stack.push(v);
-      }
-    }
-  }
+		for (auto v: graph[u]) {
+			if (!reachable[v]) {
+				reachable[v] = true;
+				stack.push(v);
+			}
+		}
+	}
 }
 
-void topological_sort_dfs(ll node, vector<bool> &visited, vector<bool> &explored,
-  vector<ll> &topo_sorted, vvl &graph, bool &has_cycle, vector<bool> &from_s, vector<bool> &to_t) {
-  visited[node] = true;
-  explored[node] = true;
-  for (auto neighbor: graph[node]) {
-    if (!visited[neighbor]) {
-      topological_sort_dfs(neighbor, visited, explored, topo_sorted, graph, has_cycle, from_s, to_t);
-      if (has_cycle) return;
-    } else if (explored[neighbor] && from_s[neighbor] && to_t[neighbor]) {
-      has_cycle = true;
-      return;
-    }
-  }
+bool topological_sort_bfs(vvl &graph, vector<ll> &topo_sorted, vector<bool> &relevant, ll r_count) {
+	ll n = graph.size() - 1;
 
-  explored[node] = false;
-  topo_sorted.push_back(node);
+	vl indegree(n + 1, 0);
+	for (ll i = 1; i <= n; i++) {
+		if (relevant[i]) {
+			for (ll neighbor: graph[i]) {
+				if (relevant[neighbor]) {
+					indegree[neighbor]++;
+				}
+			}
+		}
+	}
+	queue<ll> q;
+	for (ll i = 1; i <= n; i++) {
+		if (relevant[i] && indegree[i] == 0) {
+			q.push(i);
+		}
+	}
+
+	while (!q.empty()) {
+		ll c = q.front();
+		q.pop();
+		if (relevant[c]) {
+			topo_sorted.push_back(c);
+		}
+
+		for (ll neighbor: graph[c]) {
+			if (relevant[neighbor]) {
+				indegree[neighbor]--;
+			}
+			if (relevant[neighbor] && indegree[neighbor] == 0) {
+				q.push(neighbor);
+			}
+		}
+	}
+	return !(r_count == topo_sorted.size());
+}
+
+int count_digit(ll n) {
+	if (n == 0) return 1;
+	return floor(log10(n) + 1);
 }
 
 int main() {
-  fastio();
+	fastio();
 
-  ll n , m;
-  cin >> n >> m;
-  ll s = 1, t = 2;
+	ll n, m;
+	cin >> n >> m;
+	ll s = 1, t = 2;
 
-  vvl adj (n+1);
-  vvl rev_adj (n+1);
+	vvl adj(n + 1);
+	vvl rev_adj(n + 1);
 
-  ll a, b;
-  for (ll i = 0; i < m; i ++) {
-    cin >> a >> b;
-	  adj[a].push_back(b);
-	  rev_adj[b].push_back(a);
-  }
+	ll a, b;
+	for (ll i = 0; i < m; i++) {
+		cin >> a >> b;
+		adj[a].push_back(b);
+		rev_adj[b].push_back(a);
+	}
 
-  vector<ll> tp_sorted;
-  bool has_cycle = false;
-  vector<bool> from_s(n+1, false);
-  vector<bool> to_t(n+1, false);
-  vector<bool> visited (n+1, false);
-  vector<bool> explored (n+1, false);
+	vector<ll> tp_sorted;
+	vector<bool> from_s(n + 1, false);
+	vector<bool> to_t(n + 1, false);
+	vector<bool> relevant(n + 1, false);
+	ll relevant_count = 0;
+	reachable_from(s, adj, from_s);
+	reachable_from(t, rev_adj, to_t);
 
-  reachable_from(s, adj, from_s);
+	for (ll k = 1; k <= n; k++) {
+		if (from_s[k] && to_t[k]) {
+			relevant[k] = true;
+			relevant_count += 1;
+		}
+	}
 
-  reachable_from(t, rev_adj, to_t);
-  for (ll k=1; k <= n; k++) {
-    if (!visited[k] && from_s[k] && to_t[k]) {
-      topological_sort_dfs(k, visited, explored, tp_sorted, adj, has_cycle,
-        from_s, to_t);
-    }
-  }
-  if (has_cycle) {
-    cout << "inf" << "\n";
-    return 0;
-  }
+	bool has_cycle = topological_sort_bfs(adj, tp_sorted, relevant, relevant_count);
+	if (has_cycle) {
+		cout << "inf" << "\n";
+	} else {
+		vector<ll> paths(n + 1, 0);
+		paths[s] = 1;
+		bool should_pad = false;
 
-  vector<ll> paths (n+1, 0);
-  paths[s] = 1;
+		for (ll c : tp_sorted) {
+			for (const auto v: adj[c]) {
+				paths[v] += paths[c];
+				if (paths[v] >= MOD) {
+					should_pad = true;
+					paths[v] %= MOD;
+				}
+			}
+		}
 
-  ll c;
-  for (ll i = tp_sorted.size() - 1; i >=0 ; i--) {
-    c = tp_sorted[i];
-    for (const auto v: adj[c]) {
-      paths[v] = (paths[v] + paths[c]) % MOD;
-    }
-  }
-
-  cout << paths[t] % MOD << "\n";
-  return 0;
+		if (should_pad) {
+			int digits = count_digit(paths[t] % MOD);
+			for (int u = 0; u < (9-digits); u++) {
+				cout << "0";
+			}
+		}
+		cout << paths[t] << "\n";
+	}
+	return 0;
 }
