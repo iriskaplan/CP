@@ -28,5 +28,5 @@ It covers:
 
 ## 🙌 Acknowledgements
 
-This class was a fantastic learning experience, thanks in large part to my amazing teammates from **Owlgorithms** — [Liel Amar](https://github.com/lielamar) and Eliav Dayanof.  
+This class was a fantastic learning experience, thanks in large part to my amazing teammates from **Owlgorithms** — [Liel Amar](https://github.com/lielamar) and [Eliav Dayanof](https://github.com/eliav98).  
 They contributed to several of the solutions, helped build the cheatsheet, and were outstanding learning partners throughout the course.
