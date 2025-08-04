@@ -1,13 +1,14 @@
-// Created by Iris Kaplan.
+// Created by Iris, Liel & Eliav.
 
 #include <bits/stdc++.h>
 
 using namespace std;
 typedef long long ll;
+typedef unsigned long long ull;
 typedef vector<ll> vl;
 typedef vector<vl> vvl;
 
-const ll MOD = 1000000000;
+const ll MOD = 1LL * 1e9;
 
 #define fastio()                                                               \
 ios::sync_with_stdio(0);                                                     \
@@ -69,7 +70,7 @@ bool topological_sort_bfs(vvl &graph, vector<ll> &topo_sorted, vector<bool> &rel
 	return !(r_count == topo_sorted.size());
 }
 
-int count_digit(ll n) {
+int count_digit(ull n) {
 	if (n == 0) return 1;
 	return floor(log10(n) + 1);
 }
@@ -79,10 +80,11 @@ int main() {
 
 	ll n, m;
 	cin >> n >> m;
+
 	ll s = 1, t = 2;
 
-	vvl adj(n + 1);
-	vvl rev_adj(n + 1);
+	vvl adj(n + 1, vl(0));
+	vvl rev_adj(n + 1, vl(0));
 
 	ll a, b;
 	for (ll i = 0; i < m; i++) {
@@ -92,9 +94,9 @@ int main() {
 	}
 
 	vector<ll> tp_sorted;
-	vector<bool> from_s(n + 1, false);
-	vector<bool> to_t(n + 1, false);
-	vector<bool> relevant(n + 1, false);
+	vector<bool> from_s(2*n, false);
+	vector<bool> to_t(2*n, false);
+	vector<bool> relevant(2*n, false);
 	ll relevant_count = 0;
 	reachable_from(s, adj, from_s);
 	reachable_from(t, rev_adj, to_t);
@@ -110,7 +112,7 @@ int main() {
 	if (has_cycle) {
 		cout << "inf" << "\n";
 	} else {
-		vector<ll> paths(n + 1, 0);
+		vector<ull> paths(2*n, 0);
 		paths[s] = 1;
 		bool should_pad = false;
 
